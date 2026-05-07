@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MisInfo Guard — Moderation Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #0a0c10;
+    --surface:   #111318;
+    --surface2:  #181c23;
+    --border:    #1f2430;
+    --border2:   #2a3040;
+    --text:      #c8cdd6;
+    --text-dim:  #5a6378;
+    --text-bright: #e8ecf2;
+    --accent:    #00d4ff;
+    --accent-dim:#003d4d;
+    --red:       #ff4d4d;
+    --red-dim:   #3d1010;
+    --yellow:    #ffc94d;
+    --yellow-dim:#3d2e00;
+    --green:     #4dff91;
+    --green-dim: #003d1a;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-brand {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .brand-icon {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .brand-name {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-bright);
+    letter-spacing: 0.05em;
+  }
+  .brand-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--accent);
+    opacity: 0.8;
+  }
+  .topbar-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .live-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    height: calc(100vh - 52px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+    overflow-y: auto;
+  }
+  .sidebar-section {
+    padding: 0 12px;
+    margin-bottom: 24px;
+  }
+  .sidebar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 4px;
+    margin-bottom: 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 12px;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); border-opacity: 0.3; }
+  .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--red);
+    color: #000;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 8px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .nav-badge.yellow { background: var(--yellow); }
+  .nav-badge.green  { background: var(--green); }
+
+  /* ── Main content ── */
+  .main {
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  /* ── Stat cards ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .stat-card.red::before   { background: var(--red); }
+  .stat-card.yellow::before { background: var(--yellow); }
+  .stat-card.green::before  { background: var(--green); }
+  .stat-card.accent::before { background: var(--accent); }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-bright);
+    line-height: 1;
+  }
+  .stat-value.red    { color: var(--red); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.green  { color: var(--green); }
+  .stat-value.accent { color: var(--accent); }
+  .stat-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-bright);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .section-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: var(--mono);
+  }
+
+  /* ── Queue table ── */
+  .queue-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+  }
+  .queue-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .queue-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .queue-table tr:hover td { background: var(--surface2); }
+  .queue-table tr:last-child td { border-bottom: none; }
+
+  .content-id {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .score-bar {
+    width: 80px; height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .score-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .score-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .badge.auto-remove  { background: var(--red-dim);    color: var(--red);    border: 1px solid var(--red); }
+  .badge.human-review { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); }
+  .badge.pass-through { background: var(--green-dim);  color: var(--green);  border: 1px solid var(--green); }
+
+  .signals-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+  .signal-tag {
+    padding: 2px 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .signal-tag.violation { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+
+  .action-btn {
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-right: 4px;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+  .action-btn.success:hover { border-color: var(--green); color: var(--green); }
+
+  /* ── Right panel ── */
+  .right-panel {
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+  }
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Confidence gauge ── */
+  .gauge-wrap {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .gauge-ring {
+    width: 100px; height: 100px;
+    margin: 0 auto 12px;
+    position: relative;
+  }
+  .gauge-ring svg { transform: rotate(-90deg); }
+  .gauge-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .gauge-score {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 600;
+  }
+  .gauge-decision {
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  /* ── Activity feed ── */
+  .feed-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+  .feed-dot.red    { background: var(--red); }
+  .feed-dot.yellow { background: var(--yellow); }
+  .feed-dot.green  { background: var(--green); }
+  .feed-time {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* ── Mini chart ── */
+  .mini-chart { margin-bottom: 20px; }
+  .chart-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .chart-label { font-size: 11px; color: var(--text-dim); width: 80px; font-family: var(--mono); font-size: 10px; }
+  .chart-track {
+    flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+  }
+  .chart-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+  .chart-pct { font-family: var(--mono); font-size: 10px; color: var(--text-dim); width: 36px; text-align: right; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">🛡</div>
+    <span class="brand-name">MISINFO GUARD</span>
+    <span class="brand-tag">v1.0</span>
+  </div>
+  <div class="topbar-meta">
+    <span class="live-dot"></span>
+    SYSTEM OPERATIONAL &nbsp;|&nbsp; <span id="clock"></span> UTC
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Moderation</div>
+      <div class="nav-item active" onclick="showView('queue')">
+        <span class="nav-icon">⚡</span> Flagged Queue
+        <span class="nav-badge" id="queue-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="showView('all')">
+        <span class="nav-icon">◈</span> All Content
+      </div>
+      <div class="nav-item" onclick="showView('appeals')">
+        <span class="nav-icon">⤴</span> Appeals
+        <span class="nav-badge yellow">1</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Governance</div>
+      <div class="nav-item" onclick="showView('stats')">
+        <span class="nav-icon">◎</span> Analytics
+      </div>
+      <div class="nav-item" onclick="showView('bias')">
+        <span class="nav-icon">⊜</span> Bias Monitor
+      </div>
+      <div class="nav-item" onclick="showView('audit')">
+        <span class="nav-icon">☰</span> Audit Log
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">System</div>
+      <div class="nav-item">
+        <span class="nav-icon">⊕</span> Submit Content
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">⚙</span> Thresholds
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="stat-card accent">
+        <div class="stat-label">Flagged Today</div>
+        <div class="stat-value accent" id="stat-total">1,240</div>
+        <div class="stat-sub">↑ 12% from yesterday</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-label">Auto-Removed</div>
+        <div class="stat-value red" id="stat-auto">87%</div>
+        <div class="stat-sub">1,079 items resolved</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Human Review</div>
+        <div class="stat-value yellow" id="stat-human">152</div>
+        <div class="stat-sub">3 pending now</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">False Positive</div>
+        <div class="stat-value green" id="stat-fp">0.03%</div>
+        <div class="stat-sub">Override rate ↓</div>
+      </div>
+    </div>
+
+    <!-- CONTENT QUEUE -->
+    <div class="section-header">
+      <div class="section-title">Flagged Content Queue</div>
+      <div class="section-hint">Showing items pending review</div>
+    </div>
+
+    <table class="queue-table">
+      <thead>
+        <tr>
+          <th>Content ID</th>
+          <th>Score</th>
+          <th>Category</th>
+          <th>Decision</th>
+          <th>Risk Signals</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="queue-body"></tbody>
+    </table>
+
+    <!-- SUBMIT DEMO -->
+    <div class="section-header">
+      <div class="section-title">Live Classifier Demo</div>
+      <div class="section-hint">Enter text to score it</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px;">
+      <textarea id="demo-text" placeholder="Paste content here to classify…" rows="3"
+        style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:6px;
+               color:var(--text);font-family:var(--mono);font-size:12px;padding:10px;
+               resize:none;outline:none;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <select id="demo-cat" style="background:var(--bg);border:1px solid var(--border2);
+          color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;">
+          <option value="general">General</option>
+          <option value="health">Health</option>
+          <option value="political">Political</option>
+          <option value="financial">Financial</option>
+          <option value="satire">Satire</option>
+        </select>
+        <button onclick="classifyDemo()"
+          style="padding:7px 16px;background:var(--accent-dim);border:1px solid var(--accent);
+                 color:var(--accent);font-family:var(--mono);font-size:11px;border-radius:4px;
+                 cursor:pointer;">
+          ▶ CLASSIFY
+        </button>
+        <span id="demo-result" style="font-family:var(--mono);font-size:12px;margin-left:8px;"></span>
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="right-panel">
+    <div class="panel-title">Selected Item</div>
+
+    <!-- Gauge -->
+    <div class="gauge-wrap" id="gauge-wrap">
+      <div class="gauge-label">Confidence Score</div>
+      <div class="gauge-ring">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#1f2430" stroke-width="8"/>
+          <circle id="gauge-arc" cx="50" cy="50" r="40" fill="none"
+            stroke="#ffc94d" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="251.2" stroke-dashoffset="251.2"
+            style="transition:stroke-dashoffset 0.6s ease, stroke 0.4s ease;"/>
+        </svg>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+          <div id="gauge-num" class="gauge-score" style="color:var(--yellow)">—</div>
+        </div>
+      </div>
+      <div id="gauge-decision" class="gauge-decision" style="color:var(--text-dim)">
+        Select an item to inspect
+      </div>
+    </div>
+
+    <!-- Category bar chart -->
+    <div class="panel-title" style="margin-top:4px;">Category Distribution</div>
+    <div class="mini-chart">
+      <div class="chart-row">
+        <div class="chart-label">Health</div>
+        <div class="chart-track"><div class="chart-fill" style="width:72%;background:var(--red);"></div></div>
+        <div class="chart-pct">72%</div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">Political</div>
+        <div class="chart-track"><div class="chart-fill" style="width:51%;background:var(--yellow);"></div></div>
+        <div class="chart-pct">51%</div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">Financial</div>
+        <div class="chart-track"><div class="chart-fill" style="width:38%;background:var(--accent);"></div></div>
+        <div class="chart-pct">38%</div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-label">Satire</div>
+        <div class="chart-track"><div class="chart-fill" style="width:18%;background:var(--green);"></div></div>
+        <div class="chart-pct">18%</div>
+      </div>
+    </div>
+
+    <!-- Recent activity feed -->
+    <div class="panel-title">Recent Activity</div>
+    <div id="activity-feed"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Clock ──────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toUTCString().slice(17, 25);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Data ───────────────────────────────────────────────────────────────────
+const QUEUE_DATA = [
+  {
+    id: '#4821', score: 0.94, category: 'health_misinfo',
+    decision: 'auto_remove', status: 'Pending Review',
+    signals: ['misinfo_signals_detected', 'excessive_caps', 'user_prior_flags'],
+    violations: [],
+  },
+  {
+    id: '#4822', score: 0.76, category: 'political',
+    decision: 'human_review', status: 'Pending Review',
+    signals: ['misinfo_signals_detected', 'exclamation_spam'],
+    violations: [],
+  },
+  {
+    id: '#4823', score: 0.61, category: 'satire',
+    decision: 'human_review', status: 'Escalated',
+    signals: ['satire_signals_present', 'misinfo_signals_detected'],
+    violations: [],
+  },
+  {
+    id: '#4824', score: 0.88, category: 'financial',
+    decision: 'auto_remove', status: 'Pending Review',
+    signals: ['policy_rule_violation', 'low_source_reputation'],
+    violations: ['wire transfer now'],
+  },
+  {
+    id: '#4825', score: 0.42, category: 'general',
+    decision: 'pass_through', status: 'Resolved',
+    signals: [],
+    violations: [],
+  },
+];
+
+const ACTIVITY = [
+  { color:'red',    time:'just now',  text: '#4825 auto-removed — health misinfo (0.96)' },
+  { color:'yellow', time:'2m ago',    text: '#4818 escalated to senior review' },
+  { color:'green',  time:'5m ago',    text: '#4810 appeal resolved — overturned' },
+  { color:'red',    time:'8m ago',    text: '#4806 auto-removed — policy violation' },
+  { color:'yellow', time:'12m ago',   text: '#4799 human review confirmed removal' },
+  { color:'green',  time:'18m ago',   text: '#4791 passed through — credible source' },
+];
+
+// ── Render queue ───────────────────────────────────────────────────────────
+function scoreColor(s) {
+  if (s >= 0.90) return '#ff4d4d';
+  if (s >= 0.60) return '#ffc94d';
+  return '#4dff91';
+}
+
+function decisionBadge(d) {
+  const map = {
+    'auto_remove':  ['auto-remove',  '⊗ AUTO-REMOVE'],
+    'human_review': ['human-review', '⊙ HUMAN REVIEW'],
+    'pass_through': ['pass-through', '✓ PASS'],
+  };
+  const [cls, label] = map[d] || ['pass-through', d];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function renderQueue() {
+  const tbody = document.getElementById('queue-body');
+  tbody.innerHTML = QUEUE_DATA.map((item, idx) => {
+    const col = scoreColor(item.score);
+    const pct = item.score * 100;
+    const signalHtml = [
+      ...item.violations.map(v => `<span class="signal-tag violation">${v}</span>`),
+      ...item.signals.map(s => `<span class="signal-tag">${s.replace(/_/g,' ')}</span>`),
+    ].join('') || '<span style="color:var(--text-dim);font-size:10px;">none</span>';
+
+    return `<tr onclick="selectItem(${idx})" style="cursor:pointer;">
+      <td><span class="content-id">${item.id}</span></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar">
+            <div class="score-fill" style="width:${pct}%;background:${col};"></div>
+          </div>
+          <span class="score-num" style="color:${col};">${item.score.toFixed(2)}</span>
+        </div>
+      </td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">
+        ${item.category.replace('_',' ')}
+      </td>
+      <td>${decisionBadge(item.decision)}</td>
+      <td><div class="signals-wrap">${signalHtml}</div></td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">${item.status}</td>
+      <td>
+        <button class="action-btn danger" onclick="doAction(event,'${item.id}','remove')">Remove</button>
+        <button class="action-btn success" onclick="doAction(event,'${item.id}','pass')">Pass</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Select item → update gauge ─────────────────────────────────────────────
+function selectItem(idx) {
+  const item = QUEUE_DATA[idx];
+  const score = item.score;
+  const col = scoreColor(score);
+
+  const circumference = 2 * Math.PI * 40;
+  const offset = circumference - (score * circumference);
+  const arc = document.getElementById('gauge-arc');
+  arc.style.strokeDashoffset = offset;
+  arc.style.stroke = col;
+
+  document.getElementById('gauge-num').textContent = score.toFixed(2);
+  document.getElementById('gauge-num').style.color = col;
+
+  const labelMap = {
+    'auto_remove': '⊗ AUTO-REMOVE',
+    'human_review': '⊙ HUMAN REVIEW',
+    'pass_through': '✓ PASS-THROUGH',
+  };
+  const decEl = document.getElementById('gauge-decision');
+  decEl.textContent = labelMap[item.decision] || item.decision;
+  decEl.style.color = col;
+}
+
+// ── Action button ──────────────────────────────────────────────────────────
+function doAction(evt, id, action) {
+  evt.stopPropagation();
+  showToast(`${id} → ${action === 'remove' ? 'Removal confirmed' : 'Passed through'}`);
+  document.getElementById('queue-badge').textContent =
+    Math.max(0, parseInt(document.getElementById('queue-badge').textContent) - 1);
+}
+
+// ── Activity feed ──────────────────────────────────────────────────────────
+function renderFeed() {
+  document.getElementById('activity-feed').innerHTML = ACTIVITY.map(a =>
+    `<div class="feed-item">
+      <div class="feed-dot ${a.color}"></div>
+      <div>
+        <div style="color:var(--text);">${a.text}</div>
+        <div class="feed-time">${a.time}</div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Live classifier demo ───────────────────────────────────────────────────
+const MISINFO_SIGNALS = [
+  "cure","miracle cure","doctors don't want","big pharma","vaccine causes",
+  "government is hiding","rigged election","deep state","stolen election",
+  "guaranteed returns","get rich quick","insider tip","100x your money",
+  "share before deleted","wake up sheeple","mainstream media lies",
+  "alternative facts","they don't want you to know","wire transfer",
+  "suppress the truth","crisis actor","false flag",
+];
+const SATIRE_SIGNALS = ["satire","parody","obviously fake","not real","/s","for entertainment","fictional"];
+const CRED_SIGNALS = ["according to","study shows","researchers found","peer reviewed","cdc","who","nih","reuters","university of","journal of"];
+
+function classifyDemo() {
+  const text = document.getElementById('demo-text').value.trim();
+  if (!text) { showToast('Enter some text first'); return; }
+
+  const lower = text.toLowerCase();
+  const words = lower.split(/\s+/).length;
+
+  let score = 0;
+  const mHits = MISINFO_SIGNALS.filter(s => lower.includes(s)).length;
+  score += Math.min(mHits / words * 8, 0.40);
+
+  const caps = (text.match(/[A-Z]/g)||[]).length / text.length;
+  if (caps > 0.25) score += 0.10;
+  const exclaim = (text.match(/!/g)||[]).length / words;
+  if (exclaim > 0.05) score += 0.08;
+
+  const sHits = SATIRE_SIGNALS.filter(s => lower.includes(s)).length;
+  if (sHits > 0) score *= 0.40;
+
+  const cHits = CRED_SIGNALS.filter(s => lower.includes(s)).length;
+  score -= Math.min(cHits / words * 3, 0.20);
+
+  score = Math.max(0, Math.min(1, score));
+
+  let decision, col;
+  if (score >= 0.90)      { decision = '⊗ AUTO-REMOVE';  col = '#ff4d4d'; }
+  else if (score >= 0.60) { decision = '⊙ HUMAN REVIEW'; col = '#ffc94d'; }
+  else                    { decision = '✓ PASS-THROUGH';  col = '#4dff91'; }
+
+  document.getElementById('demo-result').innerHTML =
+    `<span style="color:${col};">Score: ${score.toFixed(2)} — ${decision}</span>`;
+}
+
+// ── Nav ────────────────────────────────────────────────────────────────────
+function showView(v) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  showToast(`View: ${v}`);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+renderQueue();
+renderFeed();
+selectItem(1);   // pre-select item 2
+</script>
+</body>
+</html>
