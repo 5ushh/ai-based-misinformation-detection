@@ -1,15 +1,15 @@
-# 🛡 AI-Based Misinformation Detection as a Socio-Technical System
+# AI-Based Misinformation Detection as a Socio-Technical System
 
-> **NYU Tandon School of Engineering — ECE-GY 5213 Introduction to Systems Engineering**  
+> **NYU Tandon School of Engineering ECE-GY 5213 Introduction to Systems Engineering**  
 > **Spring 2026 | Sushmitha Vashist (sv3005)**
 
-A full-stack, human-in-the-loop content moderation platform that combines NLP-based misinformation classification with a moderator dashboard, audit logging, bias monitoring, and a REST API — designed and built using systems engineering principles.
+A full stack, human in the loop content moderation platform that combines NLP based misinformation classification with a moderator dashboard, audit logging, bias monitoring, and a REST API designed and built using systems engineering principles.
 
 ---
 
-## 📐 System Overview
+## System Overview
 
-This project treats AI-based misinformation detection **not** as a standalone classification problem, but as a **complex socio-technical system** with interconnected technical, human, and regulatory components.
+This project treats AI based misinformation detection **not** as a standalone classification problem, but as a **complex socio technical system** with interconnected technical, human, and regulatory components.
 
 ```
 User Content → [AI Classifier] → Confidence Score → [Router]
@@ -24,7 +24,7 @@ User Content → [AI Classifier] → Confidence Score → [Router]
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 | Layer | Component | Technology |
 |---|---|---|
@@ -37,7 +37,7 @@ User Content → [AI Classifier] → Confidence Score → [Router]
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ai-misinfo-detection/
@@ -58,7 +58,7 @@ ai-misinfo-detection/
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Clone & install
 
@@ -96,7 +96,7 @@ pytest tests/ -v
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -136,7 +136,7 @@ curl -X POST http://localhost:8000/api/v1/content/submit \
 
 ---
 
-## 🧠 Scoring Logic
+## Scoring Logic
 
 The classifier assigns a confidence score `[0, 1]` using:
 
@@ -159,23 +159,23 @@ The classifier assigns a confidence score `[0, 1]` using:
 
 ---
 
-## 📊 Systems Engineering Lifecycle
+## Systems Engineering Lifecycle
 
 This project was developed following a formal **three-stage systems engineering lifecycle**:
 
-### Stage 1 — Concept Development
+### Stage 1 Concept Development
 - Stakeholder needs analysis (Platform, Users, Moderators, Regulators)
 - Four concept alternatives evaluated
 - Selected: **Human-AI Hybrid Moderation** as optimal balance of scalability, accountability, and compliance
 
-### Stage 2 — Engineering Development
+### Stage 2 Engineering Development
 - Modular microservices architecture (ingestion → inference → routing → moderation → audit)
 - Iterative development with UAT: **30% reduction** in moderator decision time
 - Performance: **sub-500ms latency** at 2M items/hour in load tests
 - Security: TLS 1.3, AES-256 at rest, RBAC, immutable audit logs
 - Bias audit pre-deployment → retrained on multilingual data
 
-### Stage 3 — Post-Development
+### Stage 3 Post Development
 - Phased rollout: health misinfo pilot → full deployment
 - **68% reduction** in flagged content spread before 1,000 views
 - Override rate: 18% → 9% across three retraining cycles
@@ -183,7 +183,7 @@ This project was developed following a formal **three-stage systems engineering 
 
 ---
 
-## 🔒 Key System Properties
+## Key System Properties
 
 - **Scalable** — microservices auto-scale independently; Kafka decouples ingestion from inference
 - **Auditable** — every moderation event logged immutably with timestamp, moderator ID, and justification code
@@ -194,7 +194,7 @@ This project was developed following a formal **three-stage systems engineering 
 
 ---
 
-## 🏆 Key Results
+## Key Results
 
 | Metric | Baseline | System |
 |---|---|---|
@@ -205,22 +205,21 @@ This project was developed following a formal **three-stage systems engineering 
 
 ---
 
-## 📚 Academic Context
+## Academic Context
 
 - **Course**: ECE-GY 5213 Introduction to Systems Engineering, NYU Tandon
 - **Instructor**: Prof. Quanyan Zhu
-- **Reports**: Midterm report (concept + architecture) + Final report (full lifecycle)
 - **Key references**: Vosoughi et al. (2018) on misinformation spread; GDPR (2016); Meta Transparency Center (2024)
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 `Python 3.12` · `FastAPI` · `Pydantic` · `pytest` · `HTML/CSS/JS` · `Docker` · `Kubernetes` · `Apache Kafka` · `PostgreSQL`
 
 ---
 
-## 👤 Author
+## Author
 
 **Sushmitha Vashist** · MS Computer Engineering, NYU Tandon (May 2026)  
 [GitHub](https://github.com/5ushh) · [LinkedIn](https://linkedin.com/in/sushmitha-vashist-5a4a3022a) · [Portfolio](https://5ushh.github.io)
