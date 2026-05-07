@@ -1,4 +1,4 @@
-# AI-Based Misinformation Detection as a Socio-Technical System
+# AI Based Misinformation Detection as a Socio Technical System
 
 > **NYU Tandon School of Engineering ECE-GY 5213 Introduction to Systems Engineering**  
 > **Spring 2026 | Sushmitha Vashist (sv3005)**
