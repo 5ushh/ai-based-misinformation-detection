@@ -185,12 +185,12 @@ This project was developed following a formal **three-stage systems engineering 
 
 ## Key System Properties
 
-- **Scalable** — microservices auto-scale independently; Kafka decouples ingestion from inference
-- **Auditable** — every moderation event logged immutably with timestamp, moderator ID, and justification code
-- **GDPR-compliant** — data minimization, right to deletion workflow, audit retention policies
-- **Bias-monitored** — category-level override rate tracking surfaces disparate impact
-- **Resilient** — graceful degradation to rule based fallback if AI inference unavailable
-- **Transparent** — users receive plain-language notifications; appeal portal with SLA
+- **Scalable**: microservices auto-scale independently; Kafka decouples ingestion from inference
+- **Auditable**: every moderation event logged immutably with timestamp, moderator ID, and justification code
+- **GDPR-compliant**: data minimization, right to deletion workflow, audit retention policies
+- **Bias-monitored**: category-level override rate tracking surfaces disparate impact
+- **Resilient**: graceful degradation to rule based fallback if AI inference unavailable
+- **Transparent**: users receive plain-language notifications; appeal portal with SLA
 
 ---
 
