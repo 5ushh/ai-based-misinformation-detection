@@ -74,7 +74,7 @@ pip install -r requirements.txt
 python demo.py
 ```
 
-This runs 6 content items through the full pipeline — scoring, routing, human moderation simulation, appeal handling, transparency stats, and bias monitoring — with color-coded terminal output.
+This runs 6 content items through the full pipeline scoring, routing, human moderation simulation, appeal handling, transparency stats, and bias monitoring with color-coded terminal output.
 
 ### 3. Start the REST API
 
@@ -86,7 +86,7 @@ Then open **http://localhost:8000/docs** for the interactive Swagger UI.
 
 ### 4. Open the Dashboard
 
-Open `src/dashboard/index.html` directly in your browser — no server required.
+Open `src/dashboard/index.html` directly in your browser no server required.
 
 ### 5. Run tests
 
@@ -187,9 +187,9 @@ This project was developed following a formal **three-stage systems engineering 
 
 - **Scalable** — microservices auto-scale independently; Kafka decouples ingestion from inference
 - **Auditable** — every moderation event logged immutably with timestamp, moderator ID, and justification code
-- **GDPR-compliant** — data minimization, right-to-deletion workflow, audit retention policies
+- **GDPR-compliant** — data minimization, right to deletion workflow, audit retention policies
 - **Bias-monitored** — category-level override rate tracking surfaces disparate impact
-- **Resilient** — graceful degradation to rule-based fallback if AI inference unavailable
+- **Resilient** — graceful degradation to rule based fallback if AI inference unavailable
 - **Transparent** — users receive plain-language notifications; appeal portal with SLA
 
 ---
